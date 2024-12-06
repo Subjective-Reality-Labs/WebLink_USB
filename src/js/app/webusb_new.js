@@ -74,6 +74,7 @@ export class V003WebUSB {
   async selectDevice(productName, filter) {
     if (!productName) productName = this.productName;
     if (!filter) filter = this.filter;
+    if (this.skipFilter) filter = {'vendorId': 0x1209};
     return new Promise ((resolve, reject) => {
       navigator.hid.requestDevice({filters: [filter]}).then((result) => {
         if (result.length < 1) {
@@ -149,11 +150,17 @@ export class V003WebUSB {
   }
 
   async send(feature, buffer) {
-    return this.dev.sendFeatureReport(feature, buffer).catch(this.sendError.bind(this));
+    return this.dev.sendFeatureReport(feature, buffer).catch((e) => {
+      this.receiveError(e);
+      throw(e);
+    });
   }
 
   async receive(feature) {
-    return this.dev.receiveFeatureReport(feature).catch(this.receiveError.bind(this));
+    return this.dev.receiveFeatureReport(feature).catch((e) => {
+      this.receiveError(e);
+      throw(e);
+    });
   }
 
   ping() {

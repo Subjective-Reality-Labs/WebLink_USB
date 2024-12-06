@@ -19,16 +19,20 @@ let docHeight = Math.max(
   window.innerHeight || 0
 );
 
+let usbBootloaderFilter = {vendorId: 0x1209, productId: 0xb003};
+
 const usb = new V003WebUSB(
   "cnlohr rv003usb",
-  {vendorId: 0x1209, productId: 0xb003},
+  usbBootloaderFilter,
   {disconnect: disconnectFlasher},
   10
 );
 
+let usbTerminalFilter = {vendorId: 0x1209, productId: 0xd003};
+
 const usbTerminal = new V003WebUSB(
   "CNLohr RV003 Custom Device",
-  {vendorId: 0x1209, productId: 0xd003},
+  usbTerminalFilter,
   {disconnect: disconnectTerminal},
   10
 )
@@ -82,13 +86,16 @@ const tooltipables = document.querySelectorAll(".tooltip");
 const tooltipContainer = document.querySelector(".tooltip-container");
 const connectButton = document.querySelector("#connect-flasher");
 const chipInfoContainer = document.querySelector(".chip-info-content");
-const settingsEntries = document.querySelectorAll(".settings");
 const programmerContainer = document.querySelector(".card.programmer");
 const backupsContainer = document.querySelector(".card.backups");
+//SETTINGS
+const settingsEntries = document.querySelectorAll(".settings");
 const numBackups = document.querySelector("#num-baclups");
 const skipFilterCheck = document.querySelector("#skip-filter");
 const disableTransitionsCheck = document.querySelector("#disable-transitions");
 const productNameInput = document.querySelector("#usb-bootloader-name");
+const usbNameInput = document.querySelector("#usb-name");
+const terminalSettings = document.querySelectorAll(".terminal.setting");
 
 ///////////////////////
 /// Event listeners ///
@@ -337,17 +344,23 @@ firmwareContainer.addEventListener("drop", (e) => {
   // firmwareLabel.innerHTML = firmware.value.split('\\').pop();
 });
 
-productNameInput.addEventListener("change", (e)=> {
+productNameInput.addEventListener("change", (e) => {
   usb.productName = generalSettings._getValue(e.target);
 });
 
 skipFilterCheck.addEventListener("change", () => {
   usb.skipFilter = skipFilterCheck.checked;
-  usbTerminal.skipFilter = skipFilterCheck.checked;
 });
 
 disableTransitionsCheck.addEventListener("change", (e) => {
   disableTransitions(e.target.checked);
+});
+
+terminalSettings.forEach((setting) => {
+  setting.addEventListener("change", (e) => {
+    e.stopPropagation();
+    loadTerminalSettings();
+  });
 });
 
 ////////////////////////////////////
@@ -380,6 +393,12 @@ function init() {
   usbTerminal.skipFilter = generalSettings["skip-filter"];
   usb.skipFilter = generalSettings["skip-filter"];
   usb.productName = generalSettings["usb-bootloader-name"];
+  usbBootloaderFilter.vendorId = generalSettings["usb-bootloader-vid"];
+  usbBootloaderFilter.productId = generalSettings["usb-bootloader-pid"];
+  usbTerminalFilter.vendorId = generalSettings["usb-vid"];
+  usbTerminalFilter.productId = generalSettings["usb-pid"];
+  
+  loadTerminalSettings();
   
   // navigator.usb.addEventListener("connect", (event) => {
   //   console.log(event);
@@ -392,7 +411,16 @@ function init() {
   // });
 }
 
-
+function loadTerminalSettings() {
+  terminal.settings.t1coeff = generalSettings["terminal-t1coeff"];
+  terminal.settings.pollDelay = generalSettings["terminal-poll-delay"];
+  terminal.settings.autoUnlock = generalSettings["terminal-unlock-check"];
+  terminal.settings.maxLinesTerminal = generalSettings["terminal-max-lines"];
+  terminal.unlockButton.classList.toggle("hidden", generalSettings["terminal-unlock-check"]);
+  usbTerminal.skipFilter = generalSettings["skip-terminal-filter"];
+  usbTerminalFilter.vendorId = generalSettings["terminal-usb-vid"];
+  usbTerminalFilter.productId = generalSettings["terminal-usb-pid"];
+}
 
 function map(x, in_min, in_max, out_min, out_max) {
   const result =(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -724,7 +752,13 @@ function showTooltip(el, container) {
       break;
     case "erase":
       container.innerHTML = `<p>Erase flash, without touching the bootloader partition</p>`;
-      break
+      break;
+    case "settings":
+      container.innerHTML = `<p>Settings</p>`;
+      break;
+    case "about":
+      container.innerHTML = `<p>About</p>`;
+      break;
   }
 }
 

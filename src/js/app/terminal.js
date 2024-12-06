@@ -1,7 +1,9 @@
-const maxLinesTerminal = 500;
-let dataCounter = 0;
-let dataArray = new Uint8Array(4096);
+const MAXLINES = 500;
 const T1COEFF = 2;
+const POLLDELAY = 10;
+// let dataCounter = 0;
+let dataArray = new Uint8Array(4096);
+
 
 function arrayToText(array) {
   let text = "";
@@ -60,11 +62,17 @@ export class Terminal {
       }
     });
     this.running;
+    this.settings = {
+      maxLinesTerminal: MAXLINES,
+      t1coeff: T1COEFF,
+      pollDelay: POLLDELAY,
+      autoUnlock: true,
+    }
   }
 
-  connect() {
+  connect() {                                                                                                                                                                                                                                                                                                         
     this.usb.connect().then(() => {
-      // this.unlockDM();
+      if (this.settings.autoUnlock) this.unlockDM(this.settings.t1coeff);
       this.connected = true;
       this.running = setInterval(() => {
         this.usb.receive(0xAB).then((result) => {
@@ -85,8 +93,9 @@ export class Terminal {
             let text = arrayToText(arr.subarray(1,8));
             this.update(text);
           }
-        });
-      }, 10);
+          this.usb.receiveErrorCnt = 0;
+        }).catch((e) => {});
+      }, this.settings.pollDelay);
       this.sendButton.classList.remove("deactive");
       if (this.callbacks.connect) this.callbacks.connect();
     });
@@ -100,13 +109,15 @@ export class Terminal {
     if (this.callbacks.disconnect) this.callbacks.disconnect();
     // downloadData();
     dataArray.fill(0);
-    dataCounter = 0;
+    // dataCounter = 0;
   }
 
   unlockDM(t1coeff) {
     let arr = new Uint8Array(79).fill(0);
     arr[0] =  0xA5;
     arr[1] = t1coeff;
+    console.log(`T1COEFF = ${t1coeff}`);
+    // T1COEFF++;
     this.usb.send(0xAA, arr).then(() => {
     });
   }
@@ -119,7 +130,10 @@ export class Terminal {
         for (let i = 0; i < 7; i++) {
           arr[i] = this.input.value.charCodeAt(i);
         }
-        this.usb.send(0xAB, arr).then(() => {this.sendButton.classList.remove("deactive");});
+        this.usb.send(0xAB, arr).then(() => {
+          this.sendButton.classList.remove("deactive");
+          this.usb.sendErrorCnt = 0;
+        }).catch((e) => {});
         this.input.value = "";
       } else {
         //usb.send here
@@ -150,8 +164,8 @@ export class Terminal {
   update(text) {
     let newText = this.window.value + text;
     let lines = newText.split("\n");
-    if (lines.length > maxLinesTerminal) {
-      lines.splice(0, lines.length - maxLinesTerminal);
+    if (lines.length > this.settings.maxLinesTerminal) {
+      lines.splice(0, lines.length - this.settings.maxLinesTerminal);
       newText = lines.join("\n");
     }
     this.window.value = newText;

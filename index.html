@@ -107,7 +107,7 @@
     </div>
     <div class="settings-container hide" id="settings">
       <div class="set-buttons">
-        <!-- <button class="wifi but">wifi</button> -->
+        <button class="terminal-settings but">terminal</button>
         <button class="set but">settings</button> 
       </div>
       <div class="cards">
@@ -131,7 +131,6 @@
               class="setting"
               default="10"
             />
-            
             <!-- <label for="poll-delay" class="set-lbl">Terminal polling delay:</label>
             <input
               type="text"
@@ -142,18 +141,34 @@
               class="setting"
               default="1000"
             /> -->
-            <label for="usb-bootloader-name" class="set-lbl">USB bootloader ProductName:</label>
+            <label for="usb-bootloader-vid" class="set-lbl">USB VID/PID:</label>
+            <div class="group-horizontal">
+              <input
+                type="text"
+                pattern="[xXa-fA-F\d]+"
+                maxlength="11"
+                name="usb-bootloader-vid"
+                id="usb-bootloader-vid"
+                class="tooltip"
+                placeholder="0x1209"
+                style="margin-right: 1rem;"
+              />
+              <input
+                type="text"
+                pattern="[xXa-fA-F\d]+"
+                maxlength="11"
+                name="usb-bootloader-pid"
+                id="usb-bootloader-pid"
+                class="tooltip"
+                placeholder="0xb003"
+                style="margin-right: 1rem;"
+              />
+            </div>
+            <label for="usb-bootloader-name" class="set-lbl">Bottloader USB ProductName:</label>
             <input
               type="text"
               id="usb-bootloader-name"
               placeholder="cnlohr rv003usb"
-              class="setting"
-            />
-            <label for="usb-name" class="set-lbl">USB ProductName:</label>
-            <input
-              type="text"
-              id="usb-name"
-              placeholder="CNLohr RV003 Custom Device"
               class="setting"
             />
             <div class="set-lbl">
@@ -169,6 +184,77 @@
             <button class="but save">save</button>
           </div>
         </div>
+        <div class="terminal-settings card hidden-down">
+          <div class="content">
+            <div class="set-lbl">
+              <input type="checkbox" id="skip-terminal-filter" class="terminal setting" default="true" />
+              <label for="skip-terminal-filter">Don't filter devices</label>
+            </div>
+            <label for="terminal-usb-vid" class="set-lbl">USB VID/PID:</label>
+            <div class="group-horizontal">
+              <input
+                type="text"
+                pattern="[xXa-fA-F\d]+"
+                maxlength="11"
+                name="usb-vid"
+                id="usb-vid"
+                class="terminal setting"
+                placeholder="0x1209"
+                style="margin-right: 1rem;"
+              />
+              <input
+                type="text"
+                pattern="[xXa-fA-F\d]+"
+                maxlength="11"
+                name="usb-pid"
+                id="termina-usb-pid"
+                class="terminal setting"
+                placeholder="0xb003"
+                style="margin-right: 1rem;"
+              />
+            </div>
+            <label for="usb-name" class="set-lbl">USB ProductName:</label>
+            <input
+              type="text"
+              id="usb-name"
+              placeholder="cnlohr rv003usb"
+              class="terminal setting"
+            />
+            <label for="terminal-max-lines" class="set-lbl">Maximum number of lines:</label>
+            <input
+              type="text"
+              minlength="1"
+              maxlength="7"
+              pattern="[0-9]+"
+              id="terminal-max-lines"
+              class="terminal setting"
+              default="500"
+            />
+            <label for="terminal-poll-delay" class="set-lbl">Terminal polling delay ms:</label>
+            <input
+              type="text"
+              minlength="1"
+              maxlength="5"
+              pattern="[0-9]+"
+              id="terminal-poll-delay"
+              class="setting"
+              default="10"
+            />
+            <label for="terminal-t1coeff" class="set-lbl">T1COEFF:</label>
+            <input
+              type="text"
+              maxlength="11"
+              pattern="[0-9]+"
+              id="terminal-t1coeff"
+              placeholder="2"
+              class="terminal setting"
+            />
+            <div class="set-lbl">
+              <input type="checkbox" id="terminal-unlock-check" class="terminal setting" default="true" />
+              <label for="terminal-unlock-check">Unlock DM automatically</label>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="popup-container">
@@ -178,10 +264,10 @@
         <div class="content"></div>
       </div>
     </div>
-    <div class="about">
+    <div id="tooltip-about" class="about tooltip">
       <p id="sw_version">v.0.9a</p>
     </div>
-    <div class="settings-button"></div>
+    <div id="tooltip-settings" class="settings-button tooltip"></div>
     <script type="module" src="src/js/index.js"></script>
   </body>
 </html>
