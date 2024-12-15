@@ -34,7 +34,7 @@ const usbTerminal = new V003WebUSB(
   "CNLohr RV003 Custom Device",
   usbTerminalFilter,
   {disconnect: disconnectTerminal},
-  10
+  20
 )
 const flasher = new Flasher.Flasher(usb,
   {
@@ -412,6 +412,7 @@ function init() {
 }
 
 function loadTerminalSettings() {
+  terminal.settings.featureID = generalSettings["terminal-feature-id"];
   terminal.settings.t1coeff = generalSettings["terminal-t1coeff"];
   terminal.settings.pollDelay = generalSettings["terminal-poll-delay"];
   terminal.settings.autoUnlock = generalSettings["terminal-unlock-check"];

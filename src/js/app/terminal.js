@@ -54,7 +54,7 @@ export class Terminal {
       this.send();
     });
     this.unlockButton.addEventListener("click", () => {
-      this.unlockDM(T1COEFF);
+      this.unlockDM(this.settings.t1coeff);
     });
     this.input.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
@@ -63,6 +63,7 @@ export class Terminal {
     });
     this.running;
     this.settings = {
+      featureID: 0xFD,
       maxLinesTerminal: MAXLINES,
       t1coeff: T1COEFF,
       pollDelay: POLLDELAY,
@@ -75,7 +76,8 @@ export class Terminal {
       if (this.settings.autoUnlock) this.unlockDM(this.settings.t1coeff);
       this.connected = true;
       this.running = setInterval(() => {
-        this.usb.receive(0xAB).then((result) => {
+        // this.usb.receive(0xFD).then((result) => {
+        this.usb.receive(this.settings.featureID).then((result) => {
           let arr = new Uint8Array(result.buffer);
           
           // dataArray.set(arr, dataCounter);
@@ -89,8 +91,11 @@ export class Terminal {
           // }
 
           if (arr[0] & 0x80) {
-            
-            let text = arrayToText(arr.subarray(1,8));
+            let len = (arr[0] & 0xf) - 4;
+            // console.log(`0x${arr[0].toString(16)}`);
+            // console.log(arr.length);
+            let text = arrayToText(arr.subarray(1, len + 1));
+            // let text = arrayToText(arr.subarray(1, 7));
             this.update(text);
           }
           this.usb.receiveErrorCnt = 0;
@@ -113,7 +118,7 @@ export class Terminal {
   }
 
   unlockDM(t1coeff) {
-    let arr = new Uint8Array(79).fill(0);
+    let arr = new Uint8Array(7).fill(0);
     arr[0] =  0xA5;
     arr[1] = t1coeff;
     console.log(`T1COEFF = ${t1coeff}`);
@@ -130,7 +135,7 @@ export class Terminal {
         for (let i = 0; i < 7; i++) {
           arr[i] = this.input.value.charCodeAt(i);
         }
-        this.usb.send(0xAB, arr).then(() => {
+        this.usb.send(this.settings.featureID, arr).then(() => {
           this.sendButton.classList.remove("deactive");
           this.usb.sendErrorCnt = 0;
         }).catch((e) => {});

@@ -16,6 +16,8 @@ export class V003WebUSB {
   }
 
   async connect(productName, filter) {
+    this.sendErrorCnt = 0;
+    this.receiveErrorCnt = 0;
     if (!productName) productName = this.productName;
     if (!filter) filter = this.filter;
     return new Promise((resolve, reject) => {
