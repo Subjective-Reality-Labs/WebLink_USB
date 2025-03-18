@@ -15,11 +15,12 @@ export class V003WebUSB {
     if (pingID == undefined) this.pingID = 0xAA;
   }
 
-  async connect(productName, filter) {
+  async connect(productName, filter, pingID) {
     this.sendErrorCnt = 0;
     this.receiveErrorCnt = 0;
     if (!productName) productName = this.productName;
     if (!filter) filter = this.filter;
+    if (pingID) this.pingID = pingID;
     return new Promise((resolve, reject) => {
       if (!navigator.hid) {
         this.error("Browser does not support HID.");

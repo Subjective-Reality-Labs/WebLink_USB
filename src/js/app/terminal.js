@@ -67,12 +67,12 @@ export class Terminal {
       maxLinesTerminal: MAXLINES,
       t1coeff: T1COEFF,
       pollDelay: POLLDELAY,
-      autoUnlock: true,
+      autoUnlock: false,
     }
   }
 
   connect() {                                                                                                                                                                                                                                                                                                         
-    this.usb.connect().then(() => {
+    this.usb.connect(undefined, undefined, this.settings.featureID).then(() => {
       if (this.settings.autoUnlock) this.unlockDM(this.settings.t1coeff);
       this.connected = true;
       this.running = setInterval(() => {
